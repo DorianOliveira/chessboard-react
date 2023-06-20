@@ -1,0 +1,40 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 5em;
+}
+.chessboard {
+  width: 400px;
+  height: 400px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.square {
+  width: calc(100% / 8);
+  height: calc(100% / 8);
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.moving {
+  background: #0af !important;
+}
+
+.chesspiece {
+  border: 1px solid;
+  width: 10px;
+  height: 20px;
+  background: #fa0;
+}
+
+.square.start:nth-child(2n) {
+  background-color: #000;
+}
+
+.square.end:nth-child(2n-1) {
+  background-color: #000;
+}
