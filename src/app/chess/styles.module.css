@@ -19,6 +19,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 }
 .moving {
   background: #0af !important;
@@ -31,10 +32,10 @@
   background: #fa0;
 }
 
-.square.start:nth-child(2n) {
+.square.odd:nth-child(2n) {
   background-color: #000;
 }
 
-.square.end:nth-child(2n-1) {
+.square.even:nth-child(2n-1) {
   background-color: #000;
 }
