@@ -13,7 +13,7 @@ function ChessPiece(props: IChessPieceProps) {
     props.onSelected(props.piece);
   }
   return (
-    <div onMouseDown={onChessPieceSelected} className={styles.chesspiece}>
+    <div title={props.piece.title} onMouseDown={onChessPieceSelected} className={styles.chesspiece}>
       {props.piece.title}
     </div>
   );

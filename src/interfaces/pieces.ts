@@ -1,4 +1,5 @@
-import * as Chessboard from "./chessboard";
+// import * as Chessboard from "./chessboard";
+import { ERuleDirection, IStepRule, EChessPieceType } from "./chessboard";
 
 export class PieceBuilder {
   build(position: number): IChessPiece {
@@ -6,6 +7,8 @@ export class PieceBuilder {
       return new Pawn(position);
 
     if (Utils.is(position, [60, 4])) return new King(position);
+
+    if (Utils.is(position, [59, 3])) return new Queen(position);
   }
 }
 
@@ -15,7 +18,7 @@ export class ChessPiece implements IChessPiece {
     this.title = type;
   }
 
-  addRule(limit: number, directions: ERuleDirection[]) {
+  addRule(limit?: number, directions: ERuleDirection[]) {
     this.rule = {
       limit,
       directions,
@@ -25,12 +28,12 @@ export class ChessPiece implements IChessPiece {
 
 export class Pawn extends ChessPiece {
   constructor(position: number) {
-    super(position, Chessboard.EChessPieceType.pawn);
+    super(position, EChessPieceType.pawn);
     this.addRule();
   }
 
   addRule() {
-    super.addRule(1, [Chessboard.ERuleDirection.up]);
+    super.addRule(1, [ERuleDirection.up]);
 
     this.rule = {
       ...this.rule,
@@ -41,8 +44,44 @@ export class Pawn extends ChessPiece {
 
 export class King extends ChessPiece {
   constructor(position: number) {
-    super(position, Chessboard.EChessPieceType.king);
-    this.addRule([Chessboard.ERuleDirection.All]);
+    super(position, EChessPieceType.king);
+    this.addRule(1, [ERuleDirection.all]);
+  }
+}
+
+export class Queen extends ChessPiece {
+  constructor(position: number) {
+    super(position, EChessPieceType.queen);
+    this.addRule(null, [ERuleDirection.all]);
+  }
+}
+
+export class Tower extends ChessPiece {
+  constructor(position: number) {
+    super(position, EChessPieceType.tower);
+    this.addRule(null, [ERuleDirection.all]);
+  }
+}
+
+export class Bishop extends ChessPiece {
+  constructor(position: number) {
+    super(position, EChessPieceType.bishop);
+    this.addRule(null, [ERuleDirection.onlyDiagonal]);
+  }
+}
+
+export class Horse extends ChessPiece {
+  constructor(position: number) {
+    super(position, EChessPieceType.horse);
+  }
+
+  addRule() {
+    this.rule = {
+      direction: ERuleDirection.onlyStraight,
+      patterns: [1, 2],
+      blockPatternOnChangeDirection: true,
+      allowBackToLastPosition: false
+    } as IStepRule;
   }
 }
 

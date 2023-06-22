@@ -5,7 +5,6 @@ export interface IChessPiece {
   imageSrc: string;
 }
 
-
 export interface ICell {
   position: number;
   chessPiece: IChessPiece;
@@ -43,18 +42,31 @@ export interface ISingleRule extends IRule {
  * Define as regras de passos complexos para: Cavalo
  */
 export interface IStepRule extends IRule {
-  steps: IStep[];
+  direction: IRuleDirection;
+  patterns: number[];
+  blockPatternOnChangeDirection: boolean;
+  allowBackToLastPosition: boolean;
 }
 
-export interface IStep {
-  direction: IRuleDirection;
-}
 export enum ERuleDirection {
+  //Todas as direções
   all = "all",
+
+  //Todas as direções não-diagonais
+  onlyStraight = "onlyStraight",
+  onlyDiagonal = "onlyDiagonal",
+
+  //Direções retas
   up = "up",
   right = "down",
   bottom = "bottom",
   left = "left",
+
+  //Direções diagonais
+  upRight = "upRight",
+  upLeft = "upLeft",
+  downRight = "downRight",
+  downLeft = "downLeft",
 }
 
 export enum EChessPieceType {

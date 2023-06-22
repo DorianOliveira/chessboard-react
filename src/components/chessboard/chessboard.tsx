@@ -62,8 +62,6 @@ export function Chessboard() {
   function setAvailableSteps() {
     if (selectedPiece) {
       const { directions, limit } = selectedPiece.rule;
-      // const cells = findCellsByDirections(selectedPiece.position, directions, limit);
-      // console.log(cells);
 
       findCellsByDirections(selectedPiece.position, directions, limit);
     }
@@ -79,13 +77,50 @@ export function Chessboard() {
       })
     );
   }
+  function getDirections() {
+    return Object.keys(ERuleDirection).filter(
+      (x) =>
+        x !== ERuleDirection.onlyStraight &&
+        x !== ERuleDirection.onlyDiagonal &&
+        x !== ERuleDirection.all
+    );
+  }
+
+  function evaluatePosition(
+    direction: ERuleDirection,
+    position: number,
+    step = 1
+  ) {
+    switch (direction) {
+      case ERuleDirection.left:
+        return position - 1 * step;
+      case ERuleDirection.right:
+        return position + 1 * step;
+      case ERuleDirection.bottom:
+        return position + 8 * step;
+      case ERuleDirection.up:
+        return position - 8 * step;
+      case ERuleDirection.upRight:
+        return position - 7 * step;
+      case ERuleDirection.upLeft:
+        return position - 9 * step;
+      case ERuleDirection.downRight:
+        return position + 7 * step;
+      case ERuleDirection.downLeft:
+        return position + 9 * step;
+    }
+  }
+
+  function isCellAvailable(position: number) {
+    return grid.some((cell) => cell.position === position && !cell.chessPiece);
+  }
 
   function findCellsByDirections(
     position: number,
     directions: ERuleDirection[],
     limit: number
   ) {
-    const seekPositions: number[] = [];
+    let seekPositions: number[] = [];
 
     directions.forEach((d) => {
       const up = d === ERuleDirection.up;
@@ -93,11 +128,41 @@ export function Chessboard() {
       const left = d === ERuleDirection.left;
       const right = d === ERuleDirection.right;
       const all = d === ERuleDirection.all;
-      let modifier = up || down ? 8 : 1;
+      const onlyStraight = d === ERuleDirection.onlyStraight;
+      const onlyDiagonal = d === ERuleDirection.onlyDiagonal;
 
-      for (let end = 0; end < limit; end++) {
-        if (down || right || all) seekPositions.push(position + modifier);
-        if (up || left || all) seekPositions.push(position - modifier);
+      let modifier = up || down ? 8 : 1;
+      // let availablePosition = position;
+
+      const availablePositions = [];
+
+      let nextPosition = position;
+      // const checkPosition = () => grid.some((cell) => availablePosition === cell.position);
+
+      if (!limit) limit = 8;
+
+      for (
+        let end = 0;
+        end < limit;
+        // || !checkPosition()
+        end++
+      ) {
+        if (all) {
+          const allDirections = getDirections();
+          allDirections.forEach((x) => {
+            availablePositions.push(
+              evaluatePosition(ERuleDirection[x], position, end + 1)
+            );
+          });
+        } else {
+          availablePositions.push(evaluatePosition(d, position));
+        }
+
+        seekPositions = [
+          ...seekPositions,
+          ...availablePositions.filter((p) => isCellAvailable(p)),
+        ];
+
         modifier += modifier;
       }
     });
