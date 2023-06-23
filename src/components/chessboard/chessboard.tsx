@@ -119,7 +119,7 @@ export function Chessboard() {
         keysExcluded = [...lShapeDirections, ...diagonalDirections];
         break;
       case ERuleDirection.onlyDiagonal:
-        keysExcluded = lShapeDirections;
+        keysExcluded = [...lShapeDirections, ...straightDirections];
         break;
       case ERuleDirection.lShape:
         keysExcluded = straightDirections;
@@ -226,68 +226,11 @@ export function Chessboard() {
 
     if (isNegativeStep(direction)) modifier *= -1;
 
-    console.log(direction, modifier, isNegativeStep(direction));
-
-    //6
-    //10
-
-    //
+    // console.log(direction);
+    // console.log(position, modifier, step);
+    // console.log(position + modifier * step);
 
     return position + modifier * step;
-
-    // const isDiagonal =
-    //   direction === ERuleDirection.upRight ||
-    //   direction === ERuleDirection.upLeft ||
-    //   direction === ERuleDirection.downRight ||
-    //   direction === ERuleDirection.downLeft;
-
-    // const isDiagonalBottom =
-    //   direction === ERuleDirection.downRight ||
-    //   direction === ERuleDirection.downLeft;
-
-    // const isDiagonalUp =
-    //   direction === ERuleDirection.upLeft ||
-    //   direction === ERuleDirection.upRight;
-
-    // const isDiagonalRight =
-    //   direction === ERuleDirection.upRight ||
-    //   direction === ERuleDirection.downRight;
-
-    // const isDiagonalLeft =
-    //   direction === ERuleDirection.upLeft ||
-    //   direction === ERuleDirection.downLeft;
-
-    // const isHorizontal =
-    //   direction === ERuleDirection.up || direction === ERuleDirection.down;
-
-    // const isVertical =
-    //   direction === ERuleDirection.up || direction === ERuleDirection.bottom;
-
-    // const isNegativeStep =
-    //   direction === ERuleDirection.left ||
-    //   direction === ERuleDirection.up ||
-    //   direction === ERuleDirection.upRight ||
-    //   direction === ERuleDirection.upLeft;
-
-    // switch (direction) {
-    //   case ERuleDirection.left:
-    //     return position - 1 * step;
-    //   case ERuleDirection.right:
-    //     return position + 1 * step;
-    //   case ERuleDirection.bottom:
-    //     return position + 8 * step;
-    //   case ERuleDirection.up:
-    //     return position - 8 * step;
-
-    //   case ERuleDirection.upRight:
-    //     return position - (isLShape ? 15 : 7) * step;
-    //   case ERuleDirection.upLeft:
-    //     return position - (isLShape ? 17 : 9) * step;
-    //   case ERuleDirection.downRight:
-    //     return position + (isLShape ? 15 : 9) * step;
-    //   case ERuleDirection.downLeft:
-    //     return position + (isLShape ? 17 : 7) * step;
-    // }
   }
 
   const isCellAvailable = (position: number) =>
@@ -295,6 +238,9 @@ export function Chessboard() {
 
   const isInitialPosition = (position: number) =>
     (position >= 0 && position < 16) || (position >= 48 && position <= 64);
+
+  const isBoardEdge = (position: number) =>
+    position % 8 === 0 || position % 8 === 7;
 
   function findCellsByDirections(
     position: number,
@@ -313,8 +259,6 @@ export function Chessboard() {
 
       const isLShape = d === ERuleDirection.lShape;
 
-      console.log(isLShape);
-
       const hasMultipleDirections =
         d === ERuleDirection.all ||
         d === ERuleDirection.onlyStraight ||
@@ -324,8 +268,6 @@ export function Chessboard() {
       for (let end = 0; end < limit; end++) {
         if (hasMultipleDirections) {
           const allDirections = getDirections(d);
-
-          //console.log(allDirections);
 
           allDirections.forEach((x) => {
             const canMoveInThisDirections = !directionsBlocked.some(
@@ -340,9 +282,17 @@ export function Chessboard() {
                 isLShape
               );
 
-              // console.log(x, nextPosition);
+              console.log(x, nextPosition);
 
-              if (!isCellAvailable(nextPosition)) directionsBlocked.push(x);
+              // console.log(nextPosition, isBoardEdge(nextPosition))
+
+              if (!isCellAvailable(nextPosition) || isBoardEdge(nextPosition)) {
+
+                console.log(x);
+                console.log(nextPosition);
+                directionsBlocked.push(x);
+              }
+                
 
               availablePositions.push(nextPosition);
             }

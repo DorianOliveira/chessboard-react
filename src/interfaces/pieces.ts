@@ -3,18 +3,18 @@ import { ERuleDirection, IStepRule, EChessPieceType } from "./chessboard";
 
 export class PieceBuilder {
   build(position: number): IChessPiece {
-    if (Utils.between(position, 8, 16) || Utils.between(position, 48, 56))
-      return new Pawn(position);
+    // if (Utils.between(position, 8, 16) || Utils.between(position, 48, 56))
+    //   return new Pawn(position);
 
-    if (Utils.is(position, [60, 4])) return new King(position);
+    // if (Utils.is(position, [60, 4])) return new King(position);
 
     if (Utils.is(position, [59, 3])) return new Queen(position);
 
     if (Utils.is(position, [1, 6, 57, 62])) return new Bishop(position);
 
-    if (Utils.is(position, [0, 7, 56, 63])) return new Tower(position);
+    // if (Utils.is(position, [0, 7, 56, 63])) return new Tower(position);
 
-    if (Utils.is(position, [2, 5, 58, 61])) return new Horse(position);
+    // if (Utils.is(position, [2, 5, 58, 61])) return new Horse(position);
   }
 }
 
@@ -59,7 +59,7 @@ export class King extends ChessPiece {
 export class Queen extends ChessPiece {
   constructor(position: number) {
     super(position, EChessPieceType.queen);
-    this.addRule(null, [ERuleDirection.all]);
+    this.addRule(null, [ERuleDirection.onlyDiagonal, ERuleDirection.onlyStraight]);
   }
 }
 
