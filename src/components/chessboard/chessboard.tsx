@@ -61,9 +61,14 @@ export function Chessboard() {
 
   function setAvailableSteps() {
     if (selectedPiece) {
-      const { directions, limit } = selectedPiece.rule;
+      const { directions, limit, canInvade } = selectedPiece.rule;
 
-      findCellsByDirections(selectedPiece.position, directions, limit);
+      findCellsByDirections(
+        selectedPiece.position,
+        directions,
+        limit,
+        canInvade
+      );
     }
   }
 
@@ -77,82 +82,270 @@ export function Chessboard() {
       })
     );
   }
-  function getDirections() {
-    return Object.keys(ERuleDirection).filter(
+  function getDirections(relatedDirection: ERuleDirection) {
+    const base = Object.keys(ERuleDirection).filter(
       (x) =>
         x !== ERuleDirection.onlyStraight &&
         x !== ERuleDirection.onlyDiagonal &&
-        x !== ERuleDirection.all
+        x !== ERuleDirection.all &&
+        x !== ERuleDirection.lShape
+    );
+
+    let keysExcluded: ERuleDirection[] = [];
+
+    const lShapeDirections = [
+      ERuleDirection.leftUp,
+      ERuleDirection.leftBottom,
+      ERuleDirection.rightUp,
+      ERuleDirection.rightBottom,
+    ];
+
+    const straightDirections = [
+      ERuleDirection.up,
+      ERuleDirection.bottom,
+      ERuleDirection.right,
+      ERuleDirection.left,
+    ];
+
+    const diagonalDirections = [
+      ERuleDirection.upRight,
+      ERuleDirection.upLeft,
+      ERuleDirection.downRight,
+      ERuleDirection.downLeft,
+    ];
+
+    switch (relatedDirection) {
+      case ERuleDirection.onlyStraight:
+        keysExcluded = [...lShapeDirections, ...diagonalDirections];
+        break;
+      case ERuleDirection.onlyDiagonal:
+        keysExcluded = lShapeDirections;
+        break;
+      case ERuleDirection.lShape:
+        keysExcluded = straightDirections;
+        break;
+    }
+
+    return base.filter((item) => !keysExcluded.includes(item));
+  }
+
+  function isDiagonal(direction: ERuleDirection) {
+    return (
+      direction === ERuleDirection.upRight ||
+      direction === ERuleDirection.upLeft ||
+      direction === ERuleDirection.downRight ||
+      direction === ERuleDirection.downLeft
+    );
+  }
+
+  function isDiagonalBottom(direction: ERuleDirection) {
+    return (
+      direction === ERuleDirection.downRight ||
+      direction === ERuleDirection.downLeft
+    );
+  }
+
+  function isDiagonalUp(direction: ERuleDirection) {
+    return (
+      direction === ERuleDirection.upLeft ||
+      direction === ERuleDirection.upRight
+    );
+  }
+
+  function isDiagonalRight(direction: ERuleDirection) {
+    return (
+      direction === ERuleDirection.upRight ||
+      direction === ERuleDirection.downRight
+    );
+  }
+
+  function isDiagonalLeft(direction: ERuleDirection) {
+    return (
+      direction === ERuleDirection.upLeft ||
+      direction === ERuleDirection.downLeft
+    );
+  }
+
+  function isHorizontal(direction: ERuleDirection) {
+    return direction === ERuleDirection.up || direction === ERuleDirection.down;
+  }
+
+  function isVertical(direction: ERuleDirection) {
+    return (
+      direction === ERuleDirection.up || direction === ERuleDirection.bottom
+    );
+  }
+
+  function isNegativeStep(direction: ERuleDirection) {
+    return (
+      direction === ERuleDirection.left ||
+      direction === ERuleDirection.up ||
+      direction === ERuleDirection.upRight ||
+      direction === ERuleDirection.upLeft ||
+      direction === ERuleDirection.leftUp ||
+      direction === ERuleDirection.rightUp
+    );
+  }
+
+  function isLShapeRight(direction: ERuleDirection) {
+    return (
+      direction === ERuleDirection.upRight ||
+      direction === ERuleDirection.downRight
+    );
+  }
+
+  function isLShapeLeft(direction: ERuleDirection) {
+    return (
+      direction === ERuleDirection.upLeft ||
+      direction === ERuleDirection.downLeft
     );
   }
 
   function evaluatePosition(
     direction: ERuleDirection,
     position: number,
-    step = 1
+    step = 1,
+    isLShape = false
   ) {
-    switch (direction) {
-      case ERuleDirection.left:
-        return position - 1 * step;
-      case ERuleDirection.right:
-        return position + 1 * step;
-      case ERuleDirection.bottom:
-        return position + 8 * step;
-      case ERuleDirection.up:
-        return position - 8 * step;
-      case ERuleDirection.upRight:
-        return position - 7 * step;
-      case ERuleDirection.upLeft:
-        return position - 9 * step;
-      case ERuleDirection.downRight:
-        return position + 7 * step;
-      case ERuleDirection.downLeft:
-        return position + 9 * step;
-    }
+    let modifier = isVertical(direction) ? 8 : 1;
+
+    const isLShapeMajor =
+      direction === ERuleDirection.leftUp ||
+      direction === ERuleDirection.rightBottom;
+
+    const isLShapeMinor =
+      direction === ERuleDirection.rightUp ||
+      direction === ERuleDirection.leftBottom;
+
+    if (isDiagonalRight(direction)) modifier = isLShape ? 15 : 7;
+
+    if (isDiagonalLeft(direction)) modifier = isLShape ? 17 : 9;
+
+    if (isLShapeMajor) modifier = 10;
+    else if (isLShapeMinor) modifier = 6;
+
+    if (isNegativeStep(direction)) modifier *= -1;
+
+    console.log(direction, modifier, isNegativeStep(direction));
+
+    //6
+    //10
+
+    //
+
+    return position + modifier * step;
+
+    // const isDiagonal =
+    //   direction === ERuleDirection.upRight ||
+    //   direction === ERuleDirection.upLeft ||
+    //   direction === ERuleDirection.downRight ||
+    //   direction === ERuleDirection.downLeft;
+
+    // const isDiagonalBottom =
+    //   direction === ERuleDirection.downRight ||
+    //   direction === ERuleDirection.downLeft;
+
+    // const isDiagonalUp =
+    //   direction === ERuleDirection.upLeft ||
+    //   direction === ERuleDirection.upRight;
+
+    // const isDiagonalRight =
+    //   direction === ERuleDirection.upRight ||
+    //   direction === ERuleDirection.downRight;
+
+    // const isDiagonalLeft =
+    //   direction === ERuleDirection.upLeft ||
+    //   direction === ERuleDirection.downLeft;
+
+    // const isHorizontal =
+    //   direction === ERuleDirection.up || direction === ERuleDirection.down;
+
+    // const isVertical =
+    //   direction === ERuleDirection.up || direction === ERuleDirection.bottom;
+
+    // const isNegativeStep =
+    //   direction === ERuleDirection.left ||
+    //   direction === ERuleDirection.up ||
+    //   direction === ERuleDirection.upRight ||
+    //   direction === ERuleDirection.upLeft;
+
+    // switch (direction) {
+    //   case ERuleDirection.left:
+    //     return position - 1 * step;
+    //   case ERuleDirection.right:
+    //     return position + 1 * step;
+    //   case ERuleDirection.bottom:
+    //     return position + 8 * step;
+    //   case ERuleDirection.up:
+    //     return position - 8 * step;
+
+    //   case ERuleDirection.upRight:
+    //     return position - (isLShape ? 15 : 7) * step;
+    //   case ERuleDirection.upLeft:
+    //     return position - (isLShape ? 17 : 9) * step;
+    //   case ERuleDirection.downRight:
+    //     return position + (isLShape ? 15 : 9) * step;
+    //   case ERuleDirection.downLeft:
+    //     return position + (isLShape ? 17 : 7) * step;
+    // }
   }
 
-  function isCellAvailable(position: number) {
-    return grid.some((cell) => cell.position === position && !cell.chessPiece);
-  }
+  const isCellAvailable = (position: number) =>
+    grid.some((cell) => cell.position === position && !cell.chessPiece);
+
+  const isInitialPosition = (position: number) =>
+    (position >= 0 && position < 16) || (position >= 48 && position <= 64);
 
   function findCellsByDirections(
     position: number,
     directions: ERuleDirection[],
-    limit: number
+    limit: number,
+    canInvade: boolean
   ) {
     let seekPositions: number[] = [];
 
     directions.forEach((d) => {
-      const up = d === ERuleDirection.up;
-      const down = d === ERuleDirection.down;
-      const left = d === ERuleDirection.left;
-      const right = d === ERuleDirection.right;
-      const all = d === ERuleDirection.all;
-      const onlyStraight = d === ERuleDirection.onlyStraight;
-      const onlyDiagonal = d === ERuleDirection.onlyDiagonal;
-
-      let modifier = up || down ? 8 : 1;
-      // let availablePosition = position;
-
       const availablePositions = [];
 
-      let nextPosition = position;
-      // const checkPosition = () => grid.some((cell) => availablePosition === cell.position);
+      if (!limit) limit = 7;
 
-      if (!limit) limit = 8;
+      const directionsBlocked: ERuleDirection[] = [];
 
-      for (
-        let end = 0;
-        end < limit;
-        // || !checkPosition()
-        end++
-      ) {
-        if (all) {
-          const allDirections = getDirections();
+      const isLShape = d === ERuleDirection.lShape;
+
+      console.log(isLShape);
+
+      const hasMultipleDirections =
+        d === ERuleDirection.all ||
+        d === ERuleDirection.onlyStraight ||
+        d === ERuleDirection.onlyDiagonal ||
+        isLShape;
+
+      for (let end = 0; end < limit; end++) {
+        if (hasMultipleDirections) {
+          const allDirections = getDirections(d);
+
+          //console.log(allDirections);
+
           allDirections.forEach((x) => {
-            availablePositions.push(
-              evaluatePosition(ERuleDirection[x], position, end + 1)
+            const canMoveInThisDirections = !directionsBlocked.some(
+              (d) => x === d
             );
+
+            if (canMoveInThisDirections || canInvade) {
+              const nextPosition = evaluatePosition(
+                ERuleDirection[x],
+                position,
+                end + 1,
+                isLShape
+              );
+
+              // console.log(x, nextPosition);
+
+              if (!isCellAvailable(nextPosition)) directionsBlocked.push(x);
+
+              availablePositions.push(nextPosition);
+            }
           });
         } else {
           availablePositions.push(evaluatePosition(d, position));
@@ -162,8 +355,6 @@ export function Chessboard() {
           ...seekPositions,
           ...availablePositions.filter((p) => isCellAvailable(p)),
         ];
-
-        modifier += modifier;
       }
     });
 
@@ -185,18 +376,13 @@ export function Chessboard() {
 
     if (grid?.length === 0) {
       const items = [];
-
       let line = "odd";
 
       for (let index = 0; index < 64; index++) {
-        if (index % 8 === 0) line = line === "odd" ? "even" : "odd";
-
         let cellPiece: IChessPiece = null;
 
-        const isInitialPosition =
-          (index >= 0 && index < 16) || (index >= 48 && index <= 64);
-
-        if (isInitialPosition) cellPiece = builder.build(index);
+        if (index % 8 === 0) line = line === "odd" ? "even" : "odd";
+        if (isInitialPosition(index)) cellPiece = builder.build(index);
 
         items.push({
           position: index,

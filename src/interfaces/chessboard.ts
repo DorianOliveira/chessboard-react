@@ -26,7 +26,9 @@ export interface IChessPieceProps {
   piece: IChessPiece;
 }
 
-export interface IRule {}
+export interface IRule {
+  canInvade: boolean;
+}
 
 /**
  * Define as regras de passos para: Peão, Torre, Rei, Rainha, Bispo
@@ -54,11 +56,16 @@ export enum ERuleDirection {
 
   //Todas as direções não-diagonais
   onlyStraight = "onlyStraight",
+
+  //Todas as direções diagonais
   onlyDiagonal = "onlyDiagonal",
+
+  //Direções no formato L-Shape
+  lShape = "lShape",
 
   //Direções retas
   up = "up",
-  right = "down",
+  right = "right",
   bottom = "bottom",
   left = "left",
 
@@ -67,6 +74,11 @@ export enum ERuleDirection {
   upLeft = "upLeft",
   downRight = "downRight",
   downLeft = "downLeft",
+
+  leftUp = "leftUp",
+  leftBottom = "leftBottom",
+  rightUp = "rightUp",
+  rightBottom = "rightBottom",
 }
 
 export enum EChessPieceType {
@@ -74,6 +86,6 @@ export enum EChessPieceType {
   tower = "Torre",
   bishop = "Bispo",
   horse = "Cavalo",
-  queen = "Queen",
+  queen = "Rainha",
   king = "Rei",
 }

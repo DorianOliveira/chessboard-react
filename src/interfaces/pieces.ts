@@ -9,6 +9,12 @@ export class PieceBuilder {
     if (Utils.is(position, [60, 4])) return new King(position);
 
     if (Utils.is(position, [59, 3])) return new Queen(position);
+
+    if (Utils.is(position, [1, 6, 57, 62])) return new Bishop(position);
+
+    if (Utils.is(position, [0, 7, 56, 63])) return new Tower(position);
+
+    if (Utils.is(position, [2, 5, 58, 61])) return new Horse(position);
   }
 }
 
@@ -18,10 +24,11 @@ export class ChessPiece implements IChessPiece {
     this.title = type;
   }
 
-  addRule(limit?: number, directions: ERuleDirection[]) {
+  addRule(limit?: number, directions: ERuleDirection[], canInvade = false) {
     this.rule = {
       limit,
       directions,
+      canInvade
     } as IRule;
   }
 }
@@ -59,7 +66,7 @@ export class Queen extends ChessPiece {
 export class Tower extends ChessPiece {
   constructor(position: number) {
     super(position, EChessPieceType.tower);
-    this.addRule(null, [ERuleDirection.all]);
+    this.addRule(null, [ERuleDirection.onlyStraight]);
   }
 }
 
@@ -73,15 +80,7 @@ export class Bishop extends ChessPiece {
 export class Horse extends ChessPiece {
   constructor(position: number) {
     super(position, EChessPieceType.horse);
-  }
-
-  addRule() {
-    this.rule = {
-      direction: ERuleDirection.onlyStraight,
-      patterns: [1, 2],
-      blockPatternOnChangeDirection: true,
-      allowBackToLastPosition: false
-    } as IStepRule;
+    this.addRule(1, [ERuleDirection.lShape], true);
   }
 }
 
