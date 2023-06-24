@@ -20,20 +20,24 @@ export function Chessboard() {
   const [oldPosition, setOldPosition] = useState<boolean>(false);
   const [grid, setGrid] = useState<ICell[]>([]);
 
-  useEffect(() => mount(), []);
+  useEffect(() => createBoard(), []);
 
-  useEffect(() => setAvailableSteps(), [selectedPiece]);
+  useEffect(() => {
+    setAvailableSteps();
+  }, [selectedPiece]);
 
   function mapGrid(position: number) {
     return grid.map((gridItem) => {
-      if (gridItem.position === position)
-        return {
+      if (gridItem.position === position) {
+        const newItem = {
           ...gridItem,
           chessPiece: {
             ...selectedPiece,
             position,
           },
         };
+        return newItem;
+      }
 
       if (gridItem.position === selectedPiece.position)
         return {
@@ -47,7 +51,6 @@ export function Chessboard() {
 
   function onCellClick(position: number) {
     const clickedCell = grid.find((cell) => cell.position === position);
-
     if (!clickedCell.chessPiece && selectedPiece) {
       setGrid(mapGrid(position));
       setSelectedPiece(null);
@@ -226,10 +229,6 @@ export function Chessboard() {
 
     if (isNegativeStep(direction)) modifier *= -1;
 
-    // console.log(direction);
-    // console.log(position, modifier, step);
-    // console.log(position + modifier * step);
-
     return position + modifier * step;
   }
 
@@ -282,17 +281,11 @@ export function Chessboard() {
                 isLShape
               );
 
-              console.log(x, nextPosition);
-
-              // console.log(nextPosition, isBoardEdge(nextPosition))
+                console.log(ERuleDirection[x], nextPosition);
 
               if (!isCellAvailable(nextPosition) || isBoardEdge(nextPosition)) {
-
-                console.log(x);
-                console.log(nextPosition);
                 directionsBlocked.push(x);
               }
-                
 
               availablePositions.push(nextPosition);
             }
@@ -321,23 +314,22 @@ export function Chessboard() {
     setGrid(newGrid);
   }
 
-  function mount() {
+  function createBoard() {
     const builder = new PieceBuilder();
 
+    const pieces = builder.build();
     if (grid?.length === 0) {
-      const items = [];
+      let items = [];
       let line = "odd";
 
       for (let index = 0; index < 64; index++) {
-        let cellPiece: IChessPiece = null;
-
         if (index % 8 === 0) line = line === "odd" ? "even" : "odd";
-        if (isInitialPosition(index)) cellPiece = builder.build(index);
+        const chessPiece = pieces.find((piece) => piece.position === index);
 
         items.push({
           position: index,
-          chessPiece: cellPiece,
           line,
+          chessPiece,
         } as ICell);
       }
       setGrid(items);

@@ -1,7 +1,17 @@
 export interface IChessPiece {
   position: number;
+  imageSrc: string;
+
   title: string;
   rule: IRule;
+  team: ETeam;
+  settings: { white: ITeamSetting; black: ITeamSetting };
+
+  imageFolder: string;
+}
+
+export interface ITeamSetting {
+  positions: number[];
   imageSrc: string;
 }
 
@@ -88,4 +98,9 @@ export enum EChessPieceType {
   horse = "Cavalo",
   queen = "Rainha",
   king = "Rei",
+}
+
+export enum ETeam {
+  white = 'white'
+  black = 'black'
 }

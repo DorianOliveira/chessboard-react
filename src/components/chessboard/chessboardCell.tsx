@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./styles.module.css";
+import Image from "next/image";
 import {
   ICellProps,
   IChessPieceProps,
@@ -7,14 +8,24 @@ import {
 } from "./../../interfaces/chessboard";
 
 function ChessPiece(props: IChessPieceProps) {
-  const [piece, setPiece] = useState<IChessPiece>(null);
-
   function onChessPieceSelected() {
     props.onSelected(props.piece);
   }
+
   return (
-    <div title={props.piece.title} onMouseDown={onChessPieceSelected} className={styles.chesspiece}>
-      {props.piece.title}
+    <div
+      title={props.piece.title}
+      onMouseDown={onChessPieceSelected}
+      className={styles.chesspiece}
+    >
+      {props.piece?.imageSrc ? (
+        <Image
+          src={props.piece.imageSrc}
+          width={60}
+          height={60}
+          alt={props.piece.title}
+        />
+      ) : null}
     </div>
   );
 }
@@ -38,7 +49,7 @@ export function ChessboardCell(props: ICellProps) {
 
   return (
     <div className={className} onClick={onClick}>
-      <strong style={{ color: "#ccc" }}>{position}</strong>
+      {/* <strong style={{ color: "#ccc" }}>{position}</strong> */}
       {chessPiece ? (
         <ChessPiece onSelected={onPieceSelected} piece={chessPiece} />
       ) : null}

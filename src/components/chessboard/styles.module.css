@@ -31,8 +31,8 @@
 
 .chesspiece {
   border: 1px solid;
-  width: 10px;
-  height: 20px;
+  /* width: 10px;
+  height: 20px; */
   background: #fa0;
 }
 
