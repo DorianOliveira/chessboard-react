@@ -220,9 +220,16 @@ export function Chessboard() {
       direction === ERuleDirection.rightUp ||
       direction === ERuleDirection.leftBottom;
 
-    if (isDiagonalRight(direction)) modifier = isLShape ? 15 : 7;
+
+    // if (isDiagonal(direction)) 
+
+
+    if (isDiagonalRight(direction)) modifier = isLShape ? 15 : 9;
+    if (isDiagonalUp(direction)) modifier = isLShape ? 15 : 7;
+
 
     if (isDiagonalLeft(direction)) modifier = isLShape ? 17 : 9;
+    if (isDiagonalBottom(direction)) modifier = isLShape ? 17: 7;
 
     if (isLShapeMajor) modifier = 10;
     else if (isLShapeMinor) modifier = 6;
@@ -238,8 +245,75 @@ export function Chessboard() {
   const isInitialPosition = (position: number) =>
     (position >= 0 && position < 16) || (position >= 48 && position <= 64);
 
-  const isBoardEdge = (position: number) =>
-    position % 8 === 0 || position % 8 === 7;
+  const isBoardEdge = (position: number, keyDirection: string): boolean => {
+    const direction = ERuleDirection[keyDirection];
+
+    const limits: {
+      min?: number;
+      max?: number;
+      edge: "horizontal" | "vertical";
+    }[] = [];
+
+    const isUpDirection =
+      direction === ERuleDirection.up ||
+      direction === ERuleDirection.upLeft ||
+      direction === ERuleDirection.upRight;
+
+    const isBottomDirection =
+      direction === ERuleDirection.bottom ||
+      direction === ERuleDirection.downLeft ||
+      direction === ERuleDirection.downRight;
+
+    const isLeftDirection =
+      direction === ERuleDirection.left ||
+      direction === ERuleDirection.downLeft ||
+      direction === ERuleDirection.upLeft;
+
+    const isRightDirection =
+      direction === ERuleDirection.right ||
+      direction === ERuleDirection.downRight ||
+      direction === ERuleDirection.upRight;
+
+    // console.log(isUpDirection, isBottomDirection, isLeftDirection, isRightDirection)
+
+    if (isUpDirection)
+      limits.push({
+        min: 0,
+        max: 7,
+      });
+
+    if (isBottomDirection)
+      limits.push({
+        min: 56,
+        max: 63,
+      });
+
+    if (isLeftDirection)
+      limits.push({
+        min: 0,
+        max: 56,
+        edge: "vertical",
+      });
+
+    if (isRightDirection)
+      limits.push({
+        min: 7,
+        max: 63,
+        edge: "vertical",
+      });
+
+    let isEdge = false;
+
+    limits.forEach((limit) => {
+      const { min, max, edge } = limit;
+      const modifier = edge === "vertical" ? 8 : 1;
+      const searchPositions = [];
+      for (let i = min; i < max; i += modifier) searchPositions.push(i);
+      isEdge ||= searchPositions.includes(position);
+    });
+
+    return isEdge;
+  };
 
   function findCellsByDirections(
     position: number,
@@ -269,24 +343,50 @@ export function Chessboard() {
           const allDirections = getDirections(d);
 
           allDirections.forEach((x) => {
+            const direction = ERuleDirection[x];
             const canMoveInThisDirections = !directionsBlocked.some(
               (d) => x === d
             );
 
-            if (canMoveInThisDirections || canInvade) {
+            console.log(
+              'Posição inicial', 
+              position,
+              direction,
+              // isCellAvailable(nextPosition) ? 'Célula disponível': 'Célula indisponível',
+              isBoardEdge(position, direction)
+                ? `Limite atingido ${direction}`
+                : `Não é o limite de ${direction}`
+            );
+
+            if (
+              (canMoveInThisDirections || canInvade) &&
+              !isBoardEdge(position, direction)
+            ) {
               const nextPosition = evaluatePosition(
-                ERuleDirection[x],
+                direction,
                 position,
                 end + 1,
                 isLShape
               );
 
-                console.log(ERuleDirection[x], nextPosition);
+              console.log(
+                'Posição alvo', 
+                nextPosition,
+                direction,
+                // isCellAvailable(nextPosition) ? 'Célula disponível': 'Célula indisponível',
+                isBoardEdge(nextPosition, direction)
+                  ? `Limite atingido ${direction}`
+                  : `Não é o limite de ${direction}`
+              );
 
-              if (!isCellAvailable(nextPosition) || isBoardEdge(nextPosition)) {
+              if (
+                !isCellAvailable(nextPosition) ||
+                isBoardEdge(nextPosition, direction)
+              ) {
                 directionsBlocked.push(x);
               }
 
+              // if (!isBoardEdge(position, direction))
               availablePositions.push(nextPosition);
             }
           });

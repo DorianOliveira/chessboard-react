@@ -49,7 +49,7 @@ export function ChessboardCell(props: ICellProps) {
 
   return (
     <div className={className} onClick={onClick}>
-      {/* <strong style={{ color: "#ccc" }}>{position}</strong> */}
+      <strong style={{ color: "#ccc", fontSize: "0.7rem" }}>{position}</strong>
       {chessPiece ? (
         <ChessPiece onSelected={onPieceSelected} piece={chessPiece} />
       ) : null}
