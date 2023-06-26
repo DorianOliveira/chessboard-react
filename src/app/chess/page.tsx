@@ -1,5 +1,5 @@
-import { Chessboard } from "./../../components/chessBoard/chessboard";
+import { Game } from "@/components/game/game";
 
 export default function Page() {
-  return <Chessboard />;
+  return <Game />;
 }

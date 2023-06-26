@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import styles from "./styles.module.css";
-import { ChessboardCell } from "./chessboardCell";
+import React, { useState, useEffect } from 'react';
+import styles from './styles.module.css';
+import { ChessboardCell } from './chessboardCell';
 import {
   IChessPiece,
   ICell,
@@ -11,12 +11,13 @@ import {
   ERuleDirection,
   ISingleRule,
   IStepRule,
-} from "./../../interfaces/chessboard";
+} from '../../interfaces/_old-chessboard';
 
-import { PieceBuilder } from "./../../interfaces/pieces";
+import { PieceBuilder } from '../../interfaces/_old-pieces';
 
 export function Chessboard() {
-  const [selectedPiece, setSelectedPiece] = useState<IChessPiece>(null);
+  const [selectedPiece, setSelectedPiece] = useState<IChessPiece | null>();
+  const [isTurnEnd, setIsTurnEnd] = useState(false);
   const [oldPosition, setOldPosition] = useState<boolean>(false);
   const [grid, setGrid] = useState<ICell[]>([]);
 
@@ -24,9 +25,13 @@ export function Chessboard() {
 
   useEffect(() => {
     setAvailableSteps();
-  }, [selectedPiece]);
+  }, [selectedPiece, setAvailableSteps]);
 
-  function mapGrid(position: number) {
+  useEffect(() => {
+    if (isTurnEnd) clearAvailableSteps();
+  }, [isTurnEnd, clearAvailableSteps]);
+
+  function mapGrid(position: number): ICell[] {
     return grid.map((gridItem) => {
       if (gridItem.position === position) {
         const newItem = {
@@ -34,16 +39,16 @@ export function Chessboard() {
           chessPiece: {
             ...selectedPiece,
             position,
-          },
-        };
+          } as IChessPiece,
+        } as ICell;
         return newItem;
       }
 
-      if (gridItem.position === selectedPiece.position)
+      if (gridItem.position === selectedPiece?.position)
         return {
           ...gridItem,
           chessPiece: null,
-        };
+        } as ICell;
 
       return gridItem;
     });
@@ -51,15 +56,21 @@ export function Chessboard() {
 
   function onCellClick(position: number) {
     const clickedCell = grid.find((cell) => cell.position === position);
-    if (!clickedCell.chessPiece && selectedPiece) {
+
+    const hasValidStep = grid.some(
+      (cell) => cell.position === position && cell.isAvailableStep
+    );
+
+    if (!clickedCell?.chessPiece && selectedPiece && hasValidStep) {
       setGrid(mapGrid(position));
       setSelectedPiece(null);
+      setIsTurnEnd(true);
     }
   }
 
   function onPieceSelected(piece: IChessPiece) {
-    clearAvailableSteps();
     setSelectedPiece(piece);
+    setIsTurnEnd(false);
   }
 
   function setAvailableSteps() {
@@ -220,16 +231,22 @@ export function Chessboard() {
       direction === ERuleDirection.rightUp ||
       direction === ERuleDirection.leftBottom;
 
+    // if (isDiagonal(direction))
 
-    // if (isDiagonal(direction)) 
+    if (isDiagonalLeft(direction) && isDiagonalUp(direction))
+      modifier = isLShape ? 17 : 9;
+    if (isDiagonalLeft(direction) && isDiagonalBottom(direction))
+      modifier = isLShape ? 17 : 7;
+    if (isDiagonalRight(direction) && isDiagonalUp(direction))
+      modifier = isLShape ? 15 : 7;
+    if (isDiagonalRight(direction) && isDiagonalBottom(direction))
+      modifier = isLShape ? 15 : 9;
 
+    // if (isDiagonalRight(direction)) modifier = isLShape ? 15 : 9;
+    // if (isDiagonalUp(direction)) modifier = isLShape ? 15 : 7;
 
-    if (isDiagonalRight(direction)) modifier = isLShape ? 15 : 9;
-    if (isDiagonalUp(direction)) modifier = isLShape ? 15 : 7;
-
-
-    if (isDiagonalLeft(direction)) modifier = isLShape ? 17 : 9;
-    if (isDiagonalBottom(direction)) modifier = isLShape ? 17: 7;
+    // if (isDiagonalLeft(direction)) modifier = isLShape ? 17 : 9;
+    // if (isDiagonalBottom(direction)) modifier = isLShape ? 17 : 7;
 
     if (isLShapeMajor) modifier = 10;
     else if (isLShapeMinor) modifier = 6;
@@ -251,7 +268,7 @@ export function Chessboard() {
     const limits: {
       min?: number;
       max?: number;
-      edge: "horizontal" | "vertical";
+      edge: 'horizontal' | 'vertical';
     }[] = [];
 
     const isUpDirection =
@@ -292,21 +309,21 @@ export function Chessboard() {
       limits.push({
         min: 0,
         max: 56,
-        edge: "vertical",
+        edge: 'vertical',
       });
 
     if (isRightDirection)
       limits.push({
         min: 7,
         max: 63,
-        edge: "vertical",
+        edge: 'vertical',
       });
 
     let isEdge = false;
 
     limits.forEach((limit) => {
       const { min, max, edge } = limit;
-      const modifier = edge === "vertical" ? 8 : 1;
+      const modifier = edge === 'vertical' ? 8 : 1;
       const searchPositions = [];
       for (let i = min; i < max; i += modifier) searchPositions.push(i);
       isEdge ||= searchPositions.includes(position);
@@ -348,16 +365,6 @@ export function Chessboard() {
               (d) => x === d
             );
 
-            console.log(
-              'Posição inicial', 
-              position,
-              direction,
-              // isCellAvailable(nextPosition) ? 'Célula disponível': 'Célula indisponível',
-              isBoardEdge(position, direction)
-                ? `Limite atingido ${direction}`
-                : `Não é o limite de ${direction}`
-            );
-
             if (
               (canMoveInThisDirections || canInvade) &&
               !isBoardEdge(position, direction)
@@ -367,16 +374,6 @@ export function Chessboard() {
                 position,
                 end + 1,
                 isLShape
-              );
-
-              console.log(
-                'Posição alvo', 
-                nextPosition,
-                direction,
-                // isCellAvailable(nextPosition) ? 'Célula disponível': 'Célula indisponível',
-                isBoardEdge(nextPosition, direction)
-                  ? `Limite atingido ${direction}`
-                  : `Não é o limite de ${direction}`
               );
 
               if (
@@ -402,13 +399,12 @@ export function Chessboard() {
     });
 
     const newGrid = grid.map((cell) => {
-      if (seekPositions.includes(cell.position))
-        return {
-          ...cell,
-          isAvailableStep: true,
-        };
+      const isAvailableStep = seekPositions.includes(cell.position);
 
-      return cell;
+      return {
+        ...cell,
+        isAvailableStep,
+      };
     });
 
     setGrid(newGrid);
@@ -420,10 +416,10 @@ export function Chessboard() {
     const pieces = builder.build();
     if (grid?.length === 0) {
       let items = [];
-      let line = "odd";
+      let line = 'odd';
 
       for (let index = 0; index < 64; index++) {
-        if (index % 8 === 0) line = line === "odd" ? "even" : "odd";
+        if (index % 8 === 0) line = line === 'odd' ? 'even' : 'odd';
         const chessPiece = pieces.find((piece) => piece.position === index);
 
         items.push({

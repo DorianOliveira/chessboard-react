@@ -1,0 +1,37 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 5em;
+}
+
+.square.odd:nth-child(2n),
+.square.even:nth-child(2n-1) {
+  background: #ccc;
+}
+
+.chessboard {
+  width: 400px;
+  height: 400px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.availableStep {
+  background: #0a0 !important;
+}
+
+.square {
+  width: calc(100% / 8);
+  height: calc(100% / 8);
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.moving {
+  background: #ff9 !important;
+}
