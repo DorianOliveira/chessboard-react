@@ -9,7 +9,7 @@ export function Board(props: IBoardProps) {
   const [grid, setGrid] = useState<IBoardCell[] | undefined>([]);
 
   useEffect(() => build(), []);
-  useEffect(() => addPieces(), [props.pieces]);
+  useEffect(() => updatedPieces(), [props.pieces]);
   useEffect(() => {
     if (props.allowedMoves) {
       const newGrid = grid?.map((cell) => {
@@ -25,32 +25,35 @@ export function Board(props: IBoardProps) {
     }
   }, [props.allowedMoves]);
 
-  function mapGrid(position: number): IBoardCell[] | undefined {
+  function mapGrid(): IBoardCell[] | undefined {
     return grid?.map((gridItem) => {
-      if (gridItem.position === position) {
+      if (gridItem.position === props.selectedMove) {
         const newItem = {
           ...gridItem,
           chessPiece: {
             ...selectedPiece,
-            position,
+            position: props.selectedMove,
           } as IChessPiece,
         } as IBoardCell;
         return newItem;
       }
 
-      if (gridItem.position === selectedPiece?.position)
+      if (gridItem.position === props.oldPosition) {
+
         return {
           ...gridItem,
           chessPiece: null,
         } as IBoardCell;
+      }
 
       return gridItem;
     });
   }
 
   useEffect(() => {
+    
     if (props.selectedMove) {
-      setGrid(mapGrid(props.selectedMove));
+      setGrid(mapGrid());
     }
   }, [props.selectedMove]);
 
@@ -66,11 +69,14 @@ export function Board(props: IBoardProps) {
     return grid;
   }
 
-  function addPieces() {
+  function updatedPieces() {
     if (props.pieces) {
       props.pieces.forEach((piece) => {
         const cell = grid?.find((c) => piece.position === c.position);
-        if (cell) cell.chessPiece = piece;
+        
+        if (cell) {
+          cell.chessPiece = piece;
+        } 
         updateCell(cell);
       });
     }

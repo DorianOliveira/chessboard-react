@@ -5,6 +5,7 @@ export interface IBoardProps {
   pieces?: IChessPiece[];
   allowedMoves?: number[];
   selectedMove?: number;
+  oldPosition?: number;
   onCellClick: (cell?: IBoardCell) => void;
   onPieceSelected: (piece: IChessPiece) => void;
   onUpdateGrid?: (grid: IBoardCell[] | undefined) => void;

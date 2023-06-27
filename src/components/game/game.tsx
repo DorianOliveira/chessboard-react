@@ -14,10 +14,11 @@ export function Game() {
   const [selectedPiece, setSelectedPiece] = useState<
     IChessPiece | null | undefined
   >();
+
   const [turn, setTurn] = useState<"think" | "select" | "drop" | "end">(
     "think"
   );
-  const [oldPosition, setOldPosition] = useState<boolean>(false);
+  const [oldPosition, setOldPosition] = useState<number | undefined>();
 
   useEffect(() => build(), []);
 
@@ -44,6 +45,12 @@ export function Game() {
   }
 
   const isCellAvailable = (position: number) => {
+    // console.log(position);
+    // console.log(pieces?.map((x) => ({ position: x.position, title: x.title })));
+    // console.log(
+    //   pieces?.some((piece: IChessPiece) => piece.position === position)
+    // );
+
     return !pieces?.some((piece: IChessPiece) => piece.position === position);
   };
 
@@ -74,10 +81,7 @@ export function Game() {
 
       for (let end = 0; end < limit; end++) {
         if (hasMultipleDirections) {
-
           const allDirections = _.getDirections(d);
-
-          console.log(allDirections)
 
           allDirections.forEach((direction) => {
             const canMoveInThisDirections = !directionsBlocked.some(
@@ -95,8 +99,6 @@ export function Game() {
                 isLShape
               );
 
-             
-
               if (
                 !isCellAvailable(nextPosition) ||
                 _.isBoardEdge(nextPosition, direction)
@@ -104,8 +106,8 @@ export function Game() {
                 directionsBlocked.push(direction);
               }
 
-              // if (!isBoardEdge(position, direction))
-              availablePositions.push(nextPosition);
+              if (!_.isBoardEdge(position, direction))
+                availablePositions.push(nextPosition);
             }
           });
         } else {
@@ -125,7 +127,16 @@ export function Game() {
   function onCellClick(cell?: IBoardCell) {
     if (cell?.isAvailableStep) {
       setSelectedMove(cell?.position);
-      // setSelectedPiece(null);
+
+      setOldPosition(selectedPiece?.position);
+
+      const updatedPieces = pieces?.map((piece) => {
+        if (piece.position === selectedPiece?.position)
+          piece.position = cell.position;
+        return piece;
+      });
+
+      setPieces(updatedPieces);
       setTurn("end");
     }
   }
@@ -150,6 +161,7 @@ export function Game() {
         selectedPiece={selectedPiece ? selectedPiece : undefined}
         allowedMoves={allowedMoves}
         selectedMove={selectedMove}
+        oldPosition={oldPosition}
         pieces={pieces}
       />
       <h3>Player 1</h3>
