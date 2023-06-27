@@ -84,14 +84,16 @@ export function Game() {
           const allDirections = _.getDirections(d);
 
           allDirections.forEach((direction) => {
+
+
             const canMoveInThisDirections = !directionsBlocked.some(
               (d) => direction === d
             );
 
-            if (
-              (canMoveInThisDirections || canInvade) &&
-              !_.isBoardEdge(position, direction)
-            ) {
+            const isValid =
+              canMoveInThisDirections && !_.isBoardEdge(position, direction);
+
+            if (isValid) {
               const nextPosition = _.evaluatePosition(
                 direction,
                 position,
@@ -99,15 +101,23 @@ export function Game() {
                 isLShape
               );
 
+              // console.log(
+              //   nextPosition,
+              //   direction,
+              //   _.isBoardEdge(nextPosition, direction)
+              // );
+
+              // console.log(nextPosition);
               if (
                 !isCellAvailable(nextPosition) ||
                 _.isBoardEdge(nextPosition, direction)
               ) {
+                // console.log(nextPosition, direction)
                 directionsBlocked.push(direction);
               }
 
-              if (!_.isBoardEdge(position, direction))
-                availablePositions.push(nextPosition);
+              // if (!_.isBoardEdge(position, direction))
+              availablePositions.push(nextPosition);
             }
           });
         } else {

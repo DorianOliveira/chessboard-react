@@ -14,7 +14,6 @@ export class DirectionHelper {
       );
     });
 
-
     let keysExcluded: ERuleDirection[] = [];
 
     const lShapeDirections = [
@@ -50,11 +49,13 @@ export class DirectionHelper {
         break;
     }
 
-    const data = base.filter((key) => {
-      return !keysExcluded.some(
-        (e) => e === ERuleDirection[key as keyof typeof ERuleDirection]
-      );
-    }).map(key => ERuleDirection[key as keyof typeof ERuleDirection])
+    const data = base
+      .filter((key) => {
+        return !keysExcluded.some(
+          (e) => e === ERuleDirection[key as keyof typeof ERuleDirection]
+        );
+      })
+      .map((key) => ERuleDirection[key as keyof typeof ERuleDirection]);
 
     return data;
   }
@@ -197,8 +198,6 @@ export class DirectionHelper {
       direction === ERuleDirection.downRight ||
       direction === ERuleDirection.upRight;
 
-    // console.log(isUpDirection, isBottomDirection, isLeftDirection, isRightDirection)
-
     if (isUpDirection)
       limits.push({
         min: 0,
@@ -225,18 +224,20 @@ export class DirectionHelper {
         edge: "vertical",
       });
 
-    let isEdge = false;
+    const searchPositions: number[] = [];
 
     limits.forEach((limit) => {
       const { min, max, edge } = limit;
-      const modifier = edge === "vertical" ? 8 : 1;
-      const searchPositions = [];
 
-      if (min && max)
-        for (let i = min; i < max; i += modifier) searchPositions.push(i);
-      isEdge ||= searchPositions.includes(position);
+      const modifier = edge === "vertical" ? 8 : 1;
+
+      if (min !== undefined && max !== undefined) {
+        for (let i = min; i < max; i += modifier) {
+          searchPositions.push(i);
+        }
+      }
     });
 
-    return isEdge;
+    return searchPositions.some((s) => s === position);
   }
 }
