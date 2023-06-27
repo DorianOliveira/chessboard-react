@@ -8,19 +8,24 @@ import { ERuleDirection } from "@/enums/enums";
 import { DirectionHelper } from "@/model/direction";
 
 export function Game() {
-  // const [grid, setGrid] = useState<IBoardCell[]>();
-
   const [pieces, setPieces] = useState<IChessPiece[]>();
-  const [targetPositions, setTargetPositions] = useState<number[]>();
-  const [selectedPiece, setSelectedPiece] = useState<IChessPiece>();
-  const [isTurnEnd, setIsTurnEnd] = useState(false);
+  const [allowedMoves, setAllowedMoves] = useState<number[]>();
+  const [selectedMove, setSelectedMove] = useState<number>();
+  const [selectedPiece, setSelectedPiece] = useState<
+    IChessPiece | null | undefined
+  >();
+  const [turn, setTurn] = useState<"think" | "select" | "drop" | "end">(
+    "think"
+  );
   const [oldPosition, setOldPosition] = useState<boolean>(false);
 
   useEffect(() => build(), []);
 
   useEffect(() => {
-    if (!isTurnEnd) {
+    if (turn === "think" && selectedPiece) {
+      console.log("setting available steps");
       setAvailableSteps();
+      setTurn("select");
     }
   }, [selectedPiece, setAvailableSteps]);
 
@@ -69,7 +74,10 @@ export function Game() {
 
       for (let end = 0; end < limit; end++) {
         if (hasMultipleDirections) {
+
           const allDirections = _.getDirections(d);
+
+          console.log(allDirections)
 
           allDirections.forEach((direction) => {
             const canMoveInThisDirections = !directionsBlocked.some(
@@ -87,6 +95,8 @@ export function Game() {
                 isLShape
               );
 
+             
+
               if (
                 !isCellAvailable(nextPosition) ||
                 _.isBoardEdge(nextPosition, direction)
@@ -101,38 +111,28 @@ export function Game() {
         } else {
           availablePositions.push(_.evaluatePosition(d, position));
         }
+
         seekPositions = [
           ...seekPositions,
           ...availablePositions.filter((p) => isCellAvailable(p)),
         ];
 
-        setTargetPositions(seekPositions);
+        setAllowedMoves(seekPositions);
       }
     });
-
-    // const newGrid = pieces?.map((cell) => {
-    //   const isAvailableStep = seekPositions.includes(cell.position);
-
-    //   return {
-    //     ...cell,
-    //     isAvailableStep,
-    //   };
-    // });
-
-    // setGrid(newGrid);
   }
 
   function onCellClick(cell?: IBoardCell) {
-    // if (!clickedCell?.chessPiece && selectedPiece && hasValidStep) {
-    //   setGrid(mapGrid(position));
-    //   setSelectedPiece(null);
-    //   setIsTurnEnd(true);
-    // }
+    if (cell?.isAvailableStep) {
+      setSelectedMove(cell?.position);
+      // setSelectedPiece(null);
+      setTurn("end");
+    }
   }
 
   function onPieceSelected(piece: IChessPiece) {
     setSelectedPiece(piece);
-    setIsTurnEnd(false);
+    setTurn("think");
   }
 
   function build() {
@@ -141,19 +141,18 @@ export function Game() {
     setPieces(chessPieces);
   }
 
-  // function onUpdateGrid(data: IBoardCell[] | undefined): void {
-  //   setGrid(data);
-  // }
-
   return (
-    // <GameContext.Provider value={grid}>
-    <Board
-      onCellClick={onCellClick}
-      onPieceSelected={onPieceSelected}
-      selectedPiece={selectedPiece}
-      targetPositions={targetPositions}
-      pieces={pieces}
-    />
-    // </GameContext.Provider>
+    <>
+      <h3>Player 2</h3>
+      <Board
+        onCellClick={onCellClick}
+        onPieceSelected={onPieceSelected}
+        selectedPiece={selectedPiece ? selectedPiece : undefined}
+        allowedMoves={allowedMoves}
+        selectedMove={selectedMove}
+        pieces={pieces}
+      />
+      <h3>Player 1</h3>
+    </>
   );
 }

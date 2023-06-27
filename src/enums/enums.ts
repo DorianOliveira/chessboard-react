@@ -1,33 +1,35 @@
 export enum ERuleDirection {
   //Todas as direções
-  all = 0,
+  all = 'All',
 
   //Todas as direções não-diagonais
-  onlyStraight,
+  onlyStraight = 'Only Straight',
 
   //Todas as direções diagonais
-  onlyDiagonal,
+  onlyDiagonal = 'Only Diagonal',
 
   //Direções no formato L-Shape
-  lShape,
+  lShape = 'L Shape',
 
   //Direções retas
-  up,
-  right,
-  bottom,
-  left,
+  up = 'Up',
+  right = 'Right',
+  bottom = 'Bottom',
+  left = 'Left',
 
   //Direções diagonais
-  upRight,
-  upLeft,
-  downRight,
-  downLeft,
+  upRight = 'Up Right',
+  upLeft = 'Up Left',
+  downRight = 'Down Right',
+  downLeft = 'Down Left',
 
-  leftUp,
-  leftBottom,
-  rightUp,
-  rightBottom,
+  leftUp = 'Left Up',
+  leftBottom = 'Left Bottom',
+  rightUp = 'Right Up',
+  rightBottom = 'Right Bottom',
 }
+
+
 
 export enum EChessPieceType {
   pawn = "Peão",

@@ -1,9 +1,10 @@
 import { IBoardCell, IChessPiece } from "./interfaces";
 
 export interface IBoardProps {
-  selectedPiece?: IChessPiece;
+  selectedPiece?: IChessPiece | undefined;
   pieces?: IChessPiece[];
-  targetPositions?: number[];
+  allowedMoves?: number[];
+  selectedMove?: number;
   onCellClick: (cell?: IBoardCell) => void;
   onPieceSelected: (piece: IChessPiece) => void;
   onUpdateGrid?: (grid: IBoardCell[] | undefined) => void;

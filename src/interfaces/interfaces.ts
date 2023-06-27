@@ -27,7 +27,7 @@ export interface ITeamSetting {
 
 export interface IBoardCell {
   position: number;
-  chessPiece: IChessPiece;
+  chessPiece?: IChessPiece | null;
   line: "odd" | "even";
   isAvailableStep?: boolean;
 }

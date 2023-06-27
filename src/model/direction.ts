@@ -1,17 +1,19 @@
-import { ERuleDirection } from "@/enums/enums";
+import { EChessPieceType, ERuleDirection } from "@/enums/enums";
 
 export class DirectionHelper {
-  static getDirections(relatedDirection: ERuleDirection) {
+  static getDirections(relatedDirection: ERuleDirection): ERuleDirection[] {
     const keys = Object.keys(ERuleDirection);
-    const indexKeys = keys as unknown as number[];
+    const base = keys.filter((x) => {
+      const ruleDirection = ERuleDirection[x as keyof typeof ERuleDirection];
 
-    const base = indexKeys.filter(
-      (x) =>
-        x !== ERuleDirection.onlyStraight &&
-        x !== ERuleDirection.onlyDiagonal &&
-        x !== ERuleDirection.all &&
-        x !== ERuleDirection.lShape
-    );
+      return (
+        ruleDirection !== ERuleDirection.onlyStraight &&
+        ruleDirection !== ERuleDirection.onlyDiagonal &&
+        ruleDirection !== ERuleDirection.all &&
+        ruleDirection !== ERuleDirection.lShape
+      );
+    });
+
 
     let keysExcluded: ERuleDirection[] = [];
 
@@ -48,7 +50,13 @@ export class DirectionHelper {
         break;
     }
 
-    return base.filter((key: number) => !keysExcluded.includes(key));
+    const data = base.filter((key) => {
+      return !keysExcluded.some(
+        (e) => e === ERuleDirection[key as keyof typeof ERuleDirection]
+      );
+    }).map(key => ERuleDirection[key as keyof typeof ERuleDirection])
+
+    return data;
   }
 
   static isDiagonal(direction: ERuleDirection) {
@@ -141,6 +149,8 @@ export class DirectionHelper {
       direction === ERuleDirection.rightUp ||
       direction === ERuleDirection.leftBottom;
 
+    // console.log(direction)
+
     // if (isDiagonal(direction))
 
     if (this.isDiagonalLeft(direction) && this.isDiagonalUp(direction))
@@ -160,9 +170,7 @@ export class DirectionHelper {
     return position + modifier * step;
   }
 
-  static isBoardEdge(position: number, keyDirection: ERuleDirection) {
-    const direction = ERuleDirection[keyDirection] as unknown as number;
-
+  static isBoardEdge(position: number, direction: ERuleDirection) {
     const limits: {
       min?: number;
       max?: number;
