@@ -83,6 +83,15 @@ export class DirectionHelper {
     );
   }
 
+  static isMultiple(direction: ERuleDirection): boolean {
+    return (
+      direction === ERuleDirection.all ||
+      direction === ERuleDirection.onlyStraight ||
+      direction === ERuleDirection.onlyDiagonal ||
+      direction === ERuleDirection.lShape
+    );
+  }
+
   static isDiagonalRight(direction: ERuleDirection) {
     return (
       direction === ERuleDirection.upRight ||
@@ -149,10 +158,6 @@ export class DirectionHelper {
     const isLShapeMinor =
       direction === ERuleDirection.rightUp ||
       direction === ERuleDirection.leftBottom;
-
-    // console.log(direction)
-
-    // if (isDiagonal(direction))
 
     if (this.isDiagonalLeft(direction) && this.isDiagonalUp(direction))
       modifier = isLShape ? 17 : 9;

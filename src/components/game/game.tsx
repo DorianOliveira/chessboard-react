@@ -32,106 +32,67 @@ export function Game() {
 
   function setAvailableSteps() {
     if (selectedPiece) {
-      const { directions, limit, canInvade } =
-        selectedPiece.rule as ISingleRule;
-
-      findCellsByDirections(
-        selectedPiece.position,
-        directions,
-        limit,
-        canInvade
-      );
+      const { directions, limit } = selectedPiece.rule as ISingleRule;
+      findMoves(selectedPiece.position, directions, limit);
     }
   }
 
-  const isCellAvailable = (position: number) => {
-    // console.log(position);
-    // console.log(pieces?.map((x) => ({ position: x.position, title: x.title })));
-    // console.log(
-    //   pieces?.some((piece: IChessPiece) => piece.position === position)
-    // );
+  const isCellAvailable = (position: number) =>
+    !pieces?.some((piece: IChessPiece) => piece.position === position);
 
-    return !pieces?.some((piece: IChessPiece) => piece.position === position);
-  };
-
-  function findCellsByDirections(
+  function findMoves(
     position: number,
     directions: ERuleDirection[],
-    limit?: number,
-    canInvade?: boolean
+    limit?: number
   ) {
     const _ = DirectionHelper;
+    let moves: number[] = [];
 
-    let seekPositions: number[] = [];
-
-    directions.forEach((d) => {
-      const availablePositions = [];
+    directions.forEach((currentDirection) => {
+      const directionPositions = [];
+      const blocked: ERuleDirection[] = [];
+      const isLShape = currentDirection === ERuleDirection.lShape;
 
       if (!limit) limit = 7;
 
-      const directionsBlocked: ERuleDirection[] = [];
-
-      const isLShape = d === ERuleDirection.lShape;
-
-      const hasMultipleDirections =
-        d === ERuleDirection.all ||
-        d === ERuleDirection.onlyStraight ||
-        d === ERuleDirection.onlyDiagonal ||
-        isLShape;
-
-      for (let end = 0; end < limit; end++) {
-        if (hasMultipleDirections) {
-          const allDirections = _.getDirections(d);
-
-          allDirections.forEach((direction) => {
-
-
-            const canMoveInThisDirections = !directionsBlocked.some(
-              (d) => direction === d
+      for (let step = 0; step < limit; step++) {
+        if (!_.isMultiple(currentDirection)) {
+          const nextPosition = _.evaluatePosition(currentDirection, position);
+          if (isCellAvailable(nextPosition))
+            directionPositions.push(nextPosition);
+        } else {
+          const searchDirections = _.getDirections(currentDirection);
+          searchDirections.forEach((direction) => {
+            const isBlocked = blocked.some(
+              (blockedDirection) => direction === blockedDirection
             );
 
-            const isValid =
-              canMoveInThisDirections && !_.isBoardEdge(position, direction);
+            const isBoardEdge = _.isBoardEdge(position, direction);
 
-            if (isValid) {
+            if (!isBlocked && !isBoardEdge) {
               const nextPosition = _.evaluatePosition(
                 direction,
                 position,
-                end + 1,
+                step + 1,
                 isLShape
               );
 
-              // console.log(
-              //   nextPosition,
-              //   direction,
-              //   _.isBoardEdge(nextPosition, direction)
-              // );
+              const isPositionAvailable = isCellAvailable(nextPosition);
+              const isPositionEdge = _.isBoardEdge(nextPosition, direction);
+              const mustBlock = !isPositionAvailable || isPositionEdge;
 
-              // console.log(nextPosition);
-              if (
-                !isCellAvailable(nextPosition) ||
-                _.isBoardEdge(nextPosition, direction)
-              ) {
-                // console.log(nextPosition, direction)
-                directionsBlocked.push(direction);
-              }
+              if (mustBlock) blocked.push(direction);
 
-              // if (!_.isBoardEdge(position, direction))
-              availablePositions.push(nextPosition);
+              if (isPositionAvailable) directionPositions.push(nextPosition);
             }
           });
-        } else {
-          availablePositions.push(_.evaluatePosition(d, position));
         }
 
-        seekPositions = [
-          ...seekPositions,
-          ...availablePositions.filter((p) => isCellAvailable(p)),
-        ];
-
-        setAllowedMoves(seekPositions);
+        moves = [...moves, ...directionPositions];
       }
     });
+
+    setAllowedMoves(moves);
   }
 
   function onCellClick(cell?: IBoardCell) {
