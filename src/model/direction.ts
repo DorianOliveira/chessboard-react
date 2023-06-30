@@ -1,4 +1,4 @@
-import { EChessPieceType, ERuleDirection } from "@/enums/enums";
+import { EChessPieceType, ERuleDirection, ETeam } from '@/enums/enums';
 
 export class DirectionHelper {
   static getDirections(relatedDirection: ERuleDirection): ERuleDirection[] {
@@ -51,9 +51,7 @@ export class DirectionHelper {
 
     const data = base
       .filter((key) => {
-        return !keysExcluded.some(
-          (e) => e === ERuleDirection[key as keyof typeof ERuleDirection]
-        );
+        return !keysExcluded.some((e) => e === ERuleDirection[key as keyof typeof ERuleDirection]);
       })
       .map((key) => ERuleDirection[key as keyof typeof ERuleDirection]);
 
@@ -70,17 +68,11 @@ export class DirectionHelper {
   }
 
   static isDiagonalBottom(direction: ERuleDirection) {
-    return (
-      direction === ERuleDirection.downRight ||
-      direction === ERuleDirection.downLeft
-    );
+    return direction === ERuleDirection.downRight || direction === ERuleDirection.downLeft;
   }
 
   static isDiagonalUp(direction: ERuleDirection) {
-    return (
-      direction === ERuleDirection.upLeft ||
-      direction === ERuleDirection.upRight
-    );
+    return direction === ERuleDirection.upLeft || direction === ERuleDirection.upRight;
   }
 
   static isMultiple(direction: ERuleDirection): boolean {
@@ -93,29 +85,19 @@ export class DirectionHelper {
   }
 
   static isDiagonalRight(direction: ERuleDirection) {
-    return (
-      direction === ERuleDirection.upRight ||
-      direction === ERuleDirection.downRight
-    );
+    return direction === ERuleDirection.upRight || direction === ERuleDirection.downRight;
   }
 
   static isDiagonalLeft(direction: ERuleDirection) {
-    return (
-      direction === ERuleDirection.upLeft ||
-      direction === ERuleDirection.downLeft
-    );
+    return direction === ERuleDirection.upLeft || direction === ERuleDirection.downLeft;
   }
 
   static isHorizontal(direction: ERuleDirection) {
-    return (
-      direction === ERuleDirection.up || direction === ERuleDirection.bottom
-    );
+    return direction === ERuleDirection.up || direction === ERuleDirection.bottom;
   }
 
   static isVertical(direction: ERuleDirection) {
-    return (
-      direction === ERuleDirection.up || direction === ERuleDirection.bottom
-    );
+    return direction === ERuleDirection.up || direction === ERuleDirection.bottom;
   }
 
   static isNegativeStep(direction: ERuleDirection) {
@@ -130,34 +112,27 @@ export class DirectionHelper {
   }
 
   static isLShapeRight(direction: ERuleDirection) {
-    return (
-      direction === ERuleDirection.upRight ||
-      direction === ERuleDirection.downRight
-    );
+    return direction === ERuleDirection.upRight || direction === ERuleDirection.downRight;
   }
 
   static isLShapeLeft(direction: ERuleDirection) {
-    return (
-      direction === ERuleDirection.upLeft ||
-      direction === ERuleDirection.downLeft
-    );
+    return direction === ERuleDirection.upLeft || direction === ERuleDirection.downLeft;
   }
 
   static evaluatePosition(
     direction: ERuleDirection,
     position: number,
+    team: ETeam,
     step = 1,
     isLShape = false
   ) {
     let modifier = this.isVertical(direction) ? 8 : 1;
 
     const isLShapeMajor =
-      direction === ERuleDirection.leftUp ||
-      direction === ERuleDirection.rightBottom;
+      direction === ERuleDirection.leftUp || direction === ERuleDirection.rightBottom;
 
     const isLShapeMinor =
-      direction === ERuleDirection.rightUp ||
-      direction === ERuleDirection.leftBottom;
+      direction === ERuleDirection.rightUp || direction === ERuleDirection.leftBottom;
 
     if (this.isDiagonalLeft(direction) && this.isDiagonalUp(direction))
       modifier = isLShape ? 17 : 9;
@@ -173,14 +148,16 @@ export class DirectionHelper {
 
     if (this.isNegativeStep(direction)) modifier *= -1;
 
+    if (team === ETeam.white) modifier *= -1;
+
     return position + modifier * step;
   }
 
-  static isBoardEdge(position: number, direction: ERuleDirection) {
+  static isBoardEdge(position: number, direction: ERuleDirection, team: ETeam) {
     const limits: {
       min?: number;
       max?: number;
-      edge?: "horizontal" | "vertical";
+      edge?: 'horizontal' | 'vertical';
     }[] = [];
 
     const isUpDirection =
@@ -219,22 +196,27 @@ export class DirectionHelper {
       limits.push({
         min: 0,
         max: 56,
-        edge: "vertical",
+        edge: 'vertical',
       });
 
     if (isRightDirection)
       limits.push({
         min: 7,
         max: 63,
-        edge: "vertical",
+        edge: 'vertical',
       });
 
     const searchPositions: number[] = [];
 
     limits.forEach((limit) => {
-      const { min, max, edge } = limit;
+      let { min, max, edge } = limit;
 
-      const modifier = edge === "vertical" ? 8 : 1;
+      if (team === ETeam.white) {
+        min = limit.max;
+        max = limit.min;
+      }
+
+      const modifier = edge === 'vertical' ? 8 : 1;
 
       if (min !== undefined && max !== undefined) {
         for (let i = min; i < max; i += modifier) {
