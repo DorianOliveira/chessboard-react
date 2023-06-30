@@ -45,8 +45,6 @@ export function Game() {
       const blocked: ERuleDirection[] = [];
       const isLShape = currentDirection === ERuleDirection.lShape;
 
-      console.log(currentDirection);
-
       if (!limit) limit = 7;
 
       for (let step = 0; step < limit; step++) {
@@ -90,7 +88,6 @@ export function Game() {
   function onCellClick(cell?: IBoardCell) {
     if (cell?.isAvailableStep) {
       setSelectedMove(cell?.position);
-
       setOldPosition(selectedPiece?.position);
 
       const updatedPieces = pieces?.map((piece) => {
